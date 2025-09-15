@@ -5,29 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>منصة ست الكل</title>
 
-    <!-- ربط الـ CSS من مجلد assets داخل نفس المستودع -->
-    <link rel="stylesheet" href="./assets/index-f95b4819.css" />
+    <!-- خط Cairo بدون ما نذكره في الصفحة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+    <!-- ستايلات بسيطة + فوتر ثابت -->
     <style>
       html,body{height:100%;margin:0}
-      #boot{position:fixed;inset:0;display:grid;place-items:center;font-family:system-ui,Arial}
+      body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
+      #boot{position:fixed;inset:0;display:grid;place-items:center;font-family:inherit}
       #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
+      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:10px 12px;text-align:center;z-index:9999;font-size:14px;line-height:1.6}
+      .stk-footer small{display:block;color:#666}
     </style>
+
+    <!-- CSS الأصلي من مجلد الأصول -->
+    <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
   <body>
     <div id="root"></div>
     <div id="boot">جاري التحميل…</div>
 
-    <!-- ملف الدخول كـ ES Module من مجلد assets النسبي -->
+    <!-- سكربت التطبيق الأصلي (ESM) -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- صندوق أخطاء بسيط بدل الصفحة الفاضية -->
+    <!-- تهيئة: فرض العنوان والميتا وتبديل النصوص أينما ظهرت + إخفاء أي فوتر قديم + إضافة فوترنا -->
     <script>
-      const boot = document.getElementById('boot');
-      function showErr(msg){ if(boot){ boot.innerHTML = '<div class="err">'+msg+'</div>'; } }
-      window.addEventListener('error', e => showErr(e?.error?.stack || e.message || String(e)));
-      window.addEventListener('unhandledrejection', e => showErr(e?.reason?.stack || e.reason || 'unhandled'));
-      window.addEventListener('load', () => { boot && boot.remove(); });
-      setTimeout(() => { boot && boot.remove(); }, 5000);
+      // 1) عنوان الصفحة وميتا
+      document.title = 'منصة ست الكل';
+      function setMeta(name, content){
+        let el = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
+        if(!el){
+          el = document.createElement('meta');
+          (name.startsWith('og:')) ? el.setAttribute('property', name) : el.setAttribute('name', name);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', content);
+      }
+      setMeta('og:title', 'منصة ست الكل');
+      setMeta('twitter:title', 'منصة ست الكل');
+      setMeta('description', 'منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
+
+      // 2) بدائل النصوص المطلوبة
+      const replacements = [
+        [/(?:منصة)\s*النشاط\s*الطلابي/gi, 'منصة ست الكل'],
+        [/مدرسة\s*الطربيل\s*المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+        [/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد'],
+        [/Shahid\s*Weeks/gi, 'منصة ست الكل']
+      ];
+
+      function replaceInNode(node){
+        if(node.nodeType === Node.TEXT_NODE){
+          let t = node.nodeValue, changed = false;
+          for(const [re, rep] of replacements){
+            const nt = t.replace(re, rep);
+            if(nt !== t){ t = nt; changed = true; }
+          }
+          if(changed) node.nodeValue = t;
+        } else if(node.nodeType === Node.ELEMENT_NODE){
+          node.childNodes.forEach(replaceInNode);
+        }
+      }
+
+      function runReplace(){
+        try { replaceInNode(document.body); } catch(_) {}
+      }
+
+      // 3) إخفاء أي فوتر قديم إن وُجد
+      function hideOldFooters(){
+        const cands = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
+        cands.forEach(el=>{
+          if(/برمجة|تصميم|حقوق|202[0-9]/i.test(el.textContent)) el.style.display='none';
+        });
+      }
+
+      // 4) إضافة فوترنا الثابت
+      function ensureFooter(){
+        if(document.getElementById('stk-footer')) return;
+        const f = document.createElement('div');
+        f.id = 'stk-footer';
+        f.className = 'stk-footer';
+        f.innerHTML = `
+          <strong>منصة ست الكل</strong>
+          <small>منصة تجريبية — جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد</small>
+        `;
+        document.body.appendChild(f);
+      }
+
+      // 5) مراقبة أي تغيّر DOM (لأنها SPA) وتطبيق الاستبدالات فورًا
+      const mo = new MutationObserver(muts=>{
+        for(const m of muts){
+          m.addedNodes && m.addedNodes.forEach(replaceInNode);
+        }
+        hideOldFooters();
+        ensureFooter();
+      });
+      window.addEventListener('DOMContentLoaded', ()=> setTimeout(()=>{
+        runReplace(); hideOldFooters(); ensureFooter();
+        mo.observe(document.body, {childList:true, subtree:true, characterData:true});
+      }, 400));
+      window.addEventListener('load', ()=> { const boot = document.getElementById('boot'); if(boot) boot.remove(); setTimeout(runReplace, 300); });
     </script>
+
+    <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
   </body>
 </html>
