@@ -5,32 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>منصة ست الكل</title>
 
-    <!-- خط Cairo بدون ما نذكره في الصفحة -->
+    <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
-
-    <!-- ستايلات بسيطة + فوتر ثابت -->
     <style>
       html,body{height:100%;margin:0}
       body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
-      #boot{position:fixed;inset:0;display:grid;place-items:center;font-family:inherit}
+      #boot{position:fixed;inset:0;display:grid;place-items:center}
       #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
       .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:10px 12px;text-align:center;z-index:9999;font-size:14px;line-height:1.6}
-      .stk-footer small{display:block;color:#666}
+      .stk-hide{display:none !important}
     </style>
 
-    <!-- CSS الأصلي من مجلد الأصول -->
+    <!-- CSS الأصلي -->
     <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
   <body>
     <div id="root"></div>
     <div id="boot">جاري التحميل…</div>
 
-    <!-- سكربت التطبيق الأصلي (ESM) -->
+    <!-- سكربت التطبيق الأصلي -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- تهيئة: فرض العنوان والميتا وتبديل النصوص أينما ظهرت + إخفاء أي فوتر قديم + إضافة فوترنا -->
+    <!-- سكربت فرض الاستبدالات وإضافة الفوتر -->
     <script>
-      // 1) عنوان الصفحة وميتا
+      // عنوان الصفحة والميتا
       document.title = 'منصة ست الكل';
       function setMeta(name, content){
         let el = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
@@ -41,69 +39,75 @@
         }
         el.setAttribute('content', content);
       }
-      setMeta('og:title', 'منصة ست الكل');
-      setMeta('twitter:title', 'منصة ست الكل');
-      setMeta('description', 'منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
+      setMeta('og:title','منصة ست الكل');
+      setMeta('twitter:title','منصة ست الكل');
+      setMeta('description','منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
 
-      // 2) بدائل النصوص المطلوبة
-      const replacements = [
-        [/(?:منصة)\s*النشاط\s*الطلابي/gi, 'منصة ست الكل'],
-        [/مدرسة\s*الطربيل\s*المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+      // العبارات المطلوب استبدالها (مع كل الاحتمالات)
+      const hardReplacePairs = [
+        // العنوان العام
+        [/(?:منصة\s*)?النشاط\s*الطلابي/gi, 'منصة ست الكل'],
+        // اسم المدرسة
+        [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+        // التذييل القديم
         [/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد'],
+        // أي ظهور لاسم المبرمج القديم
+        [/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد'],
         [/Shahid\s*Weeks/gi, 'منصة ست الكل']
       ];
 
+      // استبدال آمن لكل عقدة نصية
       function replaceInNode(node){
         if(node.nodeType === Node.TEXT_NODE){
           let t = node.nodeValue, changed = false;
-          for(const [re, rep] of replacements){
+          for(const [re, rep] of hardReplacePairs){
             const nt = t.replace(re, rep);
             if(nt !== t){ t = nt; changed = true; }
           }
           if(changed) node.nodeValue = t;
         } else if(node.nodeType === Node.ELEMENT_NODE){
+          // لو النص موزع على عناصر متعددة داخل عنصر واحد (مثل الفوتر)
+          const txt = node.innerText || '';
+          if(/برمجة|تصميم|عبد ?الله/.test(txt) && txt.length < 120 && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE'){
+            node.innerText = txt
+              .replace(/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد')
+              .replace(/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد');
+          }
           node.childNodes.forEach(replaceInNode);
         }
       }
 
-      function runReplace(){
-        try { replaceInNode(document.body); } catch(_) {}
-      }
-
-      // 3) إخفاء أي فوتر قديم إن وُجد
+      // إخفاء أي فوتر قديم واضح
       function hideOldFooters(){
-        const cands = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
-        cands.forEach(el=>{
-          if(/برمجة|تصميم|حقوق|202[0-9]/i.test(el.textContent)) el.style.display='none';
+        const candidates = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
+        candidates.forEach(el=>{
+          const t = (el.innerText||'').trim();
+          if(/برمجة|تصميم|عبد ?الله|حقوق/.test(t)) el.classList.add('stk-hide');
         });
       }
 
-      // 4) إضافة فوترنا الثابت
+      // إضافة فوترنا الثابت
       function ensureFooter(){
         if(document.getElementById('stk-footer')) return;
         const f = document.createElement('div');
         f.id = 'stk-footer';
         f.className = 'stk-footer';
-        f.innerHTML = `
-          <strong>منصة ست الكل</strong>
-          <small>منصة تجريبية — جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد</small>
-        `;
+        f.innerHTML = '<strong>منصة ست الكل</strong><div>منصة تجريبية — جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد</div>';
         document.body.appendChild(f);
       }
 
-      // 5) مراقبة أي تغيّر DOM (لأنها SPA) وتطبيق الاستبدالات فورًا
-      const mo = new MutationObserver(muts=>{
-        for(const m of muts){
-          m.addedNodes && m.addedNodes.forEach(replaceInNode);
-        }
-        hideOldFooters();
-        ensureFooter();
-      });
-      window.addEventListener('DOMContentLoaded', ()=> setTimeout(()=>{
-        runReplace(); hideOldFooters(); ensureFooter();
-        mo.observe(document.body, {childList:true, subtree:true, characterData:true});
-      }, 400));
-      window.addEventListener('load', ()=> { const boot = document.getElementById('boot'); if(boot) boot.remove(); setTimeout(runReplace, 300); });
+      // تشغيل الاستبدال بشكل متكرر أول ثوانٍ + مراقبة لاحقة
+      function sweep(){
+        try { replaceInNode(document.body); hideOldFooters(); ensureFooter(); } catch(e){}
+      }
+      // مسح متكرر أول 10 ثواني (يلتقط تحميل SPA المرحلي)
+      let n=0, iv = setInterval(()=>{ sweep(); if(++n>20){ clearInterval(iv); } }, 500);
+      // مراقب تغيّرات DOM بعد ذلك
+      const mo = new MutationObserver(()=>sweep());
+      mo.observe(document.documentElement, { childList:true, subtree:true, characterData:true });
+
+      // إزالة شاشة التحميل بعد ظهور المحتوى
+      window.addEventListener('load', ()=>{ document.getElementById('boot')?.remove(); sweep(); });
     </script>
 
     <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
