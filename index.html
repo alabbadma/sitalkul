@@ -5,36 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>منصة ست الكل</title>
 
-    <!-- خط Cairo (ما يغيّر التنسيق الأصلي) -->
+    <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
 
-    <!-- تحميل وحدات ESM التي يطلبها الباندل عند الحاجة -->
+    <!-- جسور الوحدات التي يستدعيها الباندل ديناميكياً -->
     <link rel="modulepreload" href="./assets/purify.es-2de9db7f.js">
     <link rel="modulepreload" href="./assets/index.es-53497cc7.js">
 
-    <!-- CSS الأصلي (تأكّد أن الملف موجود في /assets) -->
+    <!-- CSS الأصلي للتطبيق -->
     <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
+
   <body style="font-family:'Cairo',system-ui,-apple-system,Segoe UI,Roboto,Arial,'Noto Sans Arabic',sans-serif;">
     <div id="root"></div>
     <div id="boot" style="position:fixed;inset:0;display:grid;place-items:center;">جاري التحميل…</div>
 
-    <!-- تهيئة بيانات "خطة النشاط الأسبوعي" لو الـlocalStorage فاضي/فاسد -->
+    <!-- تهيئة بيانات خطة النشاط الأسبوعي مرة واحدة فقط لو التخزين فاضي/فاسد -->
     <script>
       (function(){
-        // مرّة واحدة فقط؛ احذف القيم الفاسدة واملأ الافتراضي
+        function isBadJSON(v){ try{ JSON.parse(v); return false; }catch(_){ return true; } }
         function setSafe(key, val){
           try{
             const cur = localStorage.getItem(key);
-            if(cur!=null){
-              try{ JSON.parse(cur); return; }catch(e){ /* فاسدة */ }
-            }
-          }catch(e){}
-          try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+            if(cur !== null && !isBadJSON(cur)) return; // موجود وصالح
+            localStorage.setItem(key, JSON.stringify(val));
+          }catch(_){}
         }
-        const weeks = [{ id:'week4', title:'الأسبوع الرابع', start:'1447/03/22', end:'1447/03/26' }];
-        const schoolSettings = { schoolName:'مدرسة ست الكل المتوسطة', principal:'ست الكل', activitiesLeader:'ست الكل' };
-        const weeklyActivityPlans = [{
+        // مرّة واحدة لمسح التخزين لو أضفت ?reset=1 في الرابط
+        if (location.search.includes('reset=1')) { try{ localStorage.clear(); }catch(_){} }
+
+        const weeks=[{ id:'week4', title:'الأسبوع الرابع', start:'1447/03/22', end:'1447/03/26' }];
+        const schoolSettings={ schoolName:'مدرسة ست الكل المتوسطة', principal:'ست الكل', activitiesLeader:'ست الكل' };
+        const weeklyActivityPlans=[{
           id:'plan_week_4',
           title:'📅 خطة الأسبوع الرابع (1447/03/22 – 1447/03/26)',
           gradeBand:'الصفوف الأولية',
@@ -46,6 +48,7 @@
             {date:'1447/03/26', field:'الثقافة والفنون', program:'الفنون', topic:'تنظيف الفصل ونثر النباتات (أصدقاء الأرض)', requirements:'أدوات تنظيف – سلال فرز – نباتات'}
           ]
         }];
+
         setSafe('weeks', weeks);
         setSafe('programs', []);
         setSafe('evidences', []);
@@ -56,35 +59,38 @@
       })();
     </script>
 
-    <!-- سكربت التطبيق الأصلي (تأكّد من وجوده في /assets) -->
+    <!-- سكربت التطبيق الأصلي -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- تعديلات خفيفة بعد التحميل: العنوان + استبدال نصوص + إزالة الشرطة في الحقوق -->
+    <!-- تعديل خفيف بعد التحميل: عنوان + تصحيح الحقوق + استبدالات محدودة (تمرير واحد فقط) -->
     <script>
       (function(){
-        const RE = [
-          [/(?:منصة)?\s*النشاط\s*الطلابي/gi, 'منصة ست الكل'],
-          [/مدرسة\s*حكيم\s*بن\s*حزام.*?(?:الطربيل|الطريبيل)\s*المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
-          [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
-          [/أ?\s*\.?\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
-          [/محمد\s*العباد/gi,'ست الكل'],
-          [/الحجي/gi,'']
-        ];
-        function walk(n){
-          if(n.nodeType===3){
-            let t=n.nodeValue, c=false;
-            for(const [r,rep] of RE){ const nt=t.replace(r,rep); if(nt!==t){t=nt;c=true;} }
-            t=t.replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
-            if(c) n.nodeValue=t;
-          }else if(n.nodeType===1 && n.tagName!=='SCRIPT' && n.tagName!=='STYLE'){
-            n.childNodes.forEach(walk);
-          }
+        function sweepOnce(){
+          try{
+            document.title = 'منصة ست الكل';
+            // تمريرة خفيفة على نصوص الصفحة بدون مراقبين
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let node, count = 0;
+            while ((node = walker.nextNode()) && count < 2000) {
+              let t = node.nodeValue;
+              let nt = t
+                .replace(/(?:منصة)?\s*النشاط\s*الطلابي/gi, 'منصة ست الكل')
+                .replace(/مدرسة\s*حكيم\s*بن\s*حزام.*?(?:الطربيل|الطريبيل)\s*المتوسطة/gi,'مدرسة ست الكل المتوسطة')
+                .replace(/مدرسة\s+.*?\s+المتوسطة/gi,'مدرسة ست الكل المتوسطة')
+                .replace(/أ?\s*\.?\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل')
+                .replace(/محمد\s*العباد/gi,'ست الكل')
+                .replace(/الحجي/gi,'')
+                .replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
+              if (nt !== t) node.nodeValue = nt;
+              count++;
+            }
+          }catch(_){}
         }
-        function apply(){ try{ walk(document.body); document.title='منصة ست الكل'; }catch(_){} }
-        const mo=new MutationObserver(apply);
-        mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
-        window.addEventListener('load',()=>{ document.getElementById('boot')?.remove(); apply(); });
-        setTimeout(apply,800);
+        window.addEventListener('load', function(){
+          document.getElementById('boot')?.remove();
+          // نفّذ بعد التحميل بمهلة قصيرة، تمريرة واحدة فقط
+          setTimeout(sweepOnce, 150);
+        });
       })();
     </script>
 
