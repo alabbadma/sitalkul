@@ -7,109 +7,133 @@
 
     <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+    <!-- ستايل بسيط + بيرقر + فوتر ثابت -->
     <style>
       html,body{height:100%;margin:0}
       body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
       #boot{position:fixed;inset:0;display:grid;place-items:center}
       #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
-      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:10px 12px;text-align:center;z-index:9999;font-size:14px;line-height:1.6}
-      .stk-hide{display:none !important}
+      .stk-burger{position:fixed;top:10px;right:10px;z-index:10000;background:#ffb84d;border:none;color:#222;padding:10px 12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.15);cursor:pointer}
+      .stk-burger:focus{outline:2px solid #0003;outline-offset:2px}
+      .stk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:9998;display:none}
+      .stk-overlay.show{display:block}
+      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:8px 12px;text-align:center;z-index:9997;font-size:14px}
+      .stk-hide{display:none!important}
     </style>
 
-    <!-- CSS الأصلي -->
+    <!-- CSS الأصلي للموقع -->
     <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
   <body>
     <div id="root"></div>
     <div id="boot">جاري التحميل…</div>
 
+    <!-- عناصر المساعدة -->
+    <div id="stk-overlay" class="stk-overlay" aria-hidden="true"></div>
+    <button id="stk-burger" class="stk-burger" aria-controls="stk-sidemenu" aria-expanded="false" title="القائمة">☰</button>
+    <div class="stk-footer"><span>منصة تجريبية  جميع الحقوق محفوظة 2025</span></div>
+
     <!-- سكربت التطبيق الأصلي -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- سكربت فرض الاستبدالات وإضافة الفوتر -->
+    <!-- سكربت تنظيف وتخصيص الواجهة -->
     <script>
-      // عنوان الصفحة والميتا
-      document.title = 'منصة ست الكل';
-      function setMeta(name, content){
-        let el = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
-        if(!el){
-          el = document.createElement('meta');
-          (name.startsWith('og:')) ? el.setAttribute('property', name) : el.setAttribute('name', name);
-          document.head.appendChild(el);
-        }
-        el.setAttribute('content', content);
-      }
-      setMeta('og:title','منصة ست الكل');
-      setMeta('twitter:title','منصة ست الكل');
-      setMeta('description','منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
+      const $ = (s,root=document)=>root.querySelector(s);
+      const $$ = (s,root=document)=>Array.from(root.querySelectorAll(s));
 
-      // العبارات المطلوب استبدالها (مع كل الاحتمالات)
-      const hardReplacePairs = [
-        // العنوان العام
-        [/(?:منصة\s*)?النشاط\s*الطلابي/gi, 'منصة ست الكل'],
-        // اسم المدرسة
-        [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
-        // التذييل القديم
-        [/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد'],
-        // أي ظهور لاسم المبرمج القديم
-        [/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد'],
-        [/Shahid\s*Weeks/gi, 'منصة ست الكل']
-      ];
-
-      // استبدال آمن لكل عقدة نصية
-      function replaceInNode(node){
-        if(node.nodeType === Node.TEXT_NODE){
-          let t = node.nodeValue, changed = false;
-          for(const [re, rep] of hardReplacePairs){
-            const nt = t.replace(re, rep);
-            if(nt !== t){ t = nt; changed = true; }
-          }
-          if(changed) node.nodeValue = t;
-        } else if(node.nodeType === Node.ELEMENT_NODE){
-          // لو النص موزع على عناصر متعددة داخل عنصر واحد (مثل الفوتر)
-          const txt = node.innerText || '';
-          if(/برمجة|تصميم|عبد ?الله/.test(txt) && txt.length < 120 && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE'){
-            node.innerText = txt
-              .replace(/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد')
-              .replace(/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد');
-          }
-          node.childNodes.forEach(replaceInNode);
-        }
-      }
-
-      // إخفاء أي فوتر قديم واضح
-      function hideOldFooters(){
-        const candidates = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
-        candidates.forEach(el=>{
-          const t = (el.innerText||'').trim();
-          if(/برمجة|تصميم|عبد ?الله|حقوق/.test(t)) el.classList.add('stk-hide');
+      // 1) العنوان في الشريط الأخضر + في الهيدر/السайдبار
+      function setBrand(){
+        document.title = 'منصة ست الكل';
+        const titleSelectors = [
+          'header h1','[class*="header"] h1','[class*="top"] h1',
+          '.navbar .brand','[class*="sidebar"] .brand','aside h1'
+        ];
+        $$(titleSelectors.join(',')).forEach(el=>{
+          if(!el) return;
+          el.textContent = 'منصة ست الكل';
+        });
+        // لو العنوان القديم موجود كنص بسيط
+        $$('.some-title, [class*="title"]').forEach(el=>{
+          if(/النشاط\s*الطلابي/i.test(el.textContent)) el.textContent='منصة ست الكل';
         });
       }
 
-      // إضافة فوترنا الثابت
-      function ensureFooter(){
-        if(document.getElementById('stk-footer')) return;
-        const f = document.createElement('div');
-        f.id = 'stk-footer';
-        f.className = 'stk-footer';
-        f.innerHTML = '<strong>منصة ست الكل</strong><div>منصة تجريبية — جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد</div>';
-        document.body.appendChild(f);
+      // 2) تنظيف الفوترات/النصوص: حذف أي ذكر لـ "الحجي" + إزالة الشرطة
+      function cleanFooters(){
+        // اخفِ أي عنصر فيه "الحجي"
+        $$('footer,[class*="footer"],[id*="footer"],body *').forEach(el=>{
+          const t=(el.innerText||'').trim();
+          if(/الحجي/i.test(t)) el.remove();
+        });
+        // أي صيغة "جميع الحقوق محفوظة — 2025" تصبح بدون الشرطة
+        $$('footer,[class*="footer"],.stk-footer,body *').forEach(el=>{
+          el && el.childNodes && el.childNodes.forEach(n=>{
+            if(n.nodeType===3){
+              n.nodeValue = n.nodeValue.replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
+            }
+          });
+        });
       }
 
-      // تشغيل الاستبدال بشكل متكرر أول ثوانٍ + مراقبة لاحقة
-      function sweep(){
-        try { replaceInNode(document.body); hideOldFooters(); ensureFooter(); } catch(e){}
+      // 3) زر البيرقر (يمين) + إغلاق عند الضغط خارج القائمة
+      let sideMenu=null;
+      function findSideMenu(){
+        const cands=['aside','[class*="sidebar"]','[class*="side"][class*="menu"]','nav[dir="rtl"]','[class*="drawer"]'];
+        for(const sel of cands){
+          const el=$(sel);
+          if(el){ return el; }
+        }
+        return null;
       }
-      // مسح متكرر أول 10 ثواني (يلتقط تحميل SPA المرحلي)
-      let n=0, iv = setInterval(()=>{ sweep(); if(++n>20){ clearInterval(iv); } }, 500);
-      // مراقب تغيّرات DOM بعد ذلك
-      const mo = new MutationObserver(()=>sweep());
-      mo.observe(document.documentElement, { childList:true, subtree:true, characterData:true });
+      function openMenu(){
+        sideMenu = sideMenu || findSideMenu();
+        if(!sideMenu) return;
+        sideMenu.style.transition='transform .25s ease';
+        sideMenu.style.transform='translateX(0)';
+        $('#stk-overlay').classList.add('show');
+        $('#stk-burger').setAttribute('aria-expanded','true');
+      }
+      function closeMenu(){
+        sideMenu = sideMenu || findSideMenu();
+        if(!sideMenu) return;
+        sideMenu.style.transition='transform .25s ease';
+        sideMenu.style.transform='translateX(100%)';
+        $('#stk-overlay').classList.remove('show');
+        $('#stk-burger').setAttribute('aria-expanded','false');
+      }
+      const burger=$('#stk-burger');
+      burger.addEventListener('click',e=>{
+        e.stopPropagation();
+        burger.getAttribute('aria-expanded')==='true'?closeMenu():openMenu();
+      });
+      $('#stk-overlay').addEventListener('click',closeMenu);
+      document.addEventListener('click',e=>{
+        sideMenu = sideMenu || findSideMenu();
+        if(!sideMenu) return;
+        if(!sideMenu.contains(e.target) && e.target!==burger) closeMenu();
+      });
 
-      // إزالة شاشة التحميل بعد ظهور المحتوى
-      window.addEventListener('load', ()=>{ document.getElementById('boot')?.remove(); sweep(); });
+      // 4) منع التعليق عند “خطة النشاط الأسبوعي” في نسخة Pages (قسم غير مفعل هنا)
+      function safeWeeklyPlan(){
+        const match=/خطة النشاط(?:\s*ال(?:أ|ا)سبوعي)/;
+        $$('a,[role="link"],[class*="menu"] li,[class*="item"]').forEach(el=>{
+          const txt=(el.innerText||'').trim();
+          if(match.test(txt)){
+            el.addEventListener('click',ev=>{
+              try{ev.preventDefault();}catch(_){}
+              alert('هذه نسخة تجريبية — هذا القسم غير مفعل هنا.');
+            }, { once:true });
+          }
+        });
+      }
+
+      // 5) مراقبة تغيّر الـDOM (SPA) وتطبيق التعديلات باستمرار
+      const applyAll=()=>{ setBrand(); cleanFooters(); safeWeeklyPlan(); };
+      const mo=new MutationObserver(applyAll);
+      mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+
+      window.addEventListener('load',()=>{ $('#boot')?.remove(); applyAll(); });
     </script>
-
-    <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
   </body>
 </html>
