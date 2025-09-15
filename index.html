@@ -1,170 +1,115 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>منصة ست الكل</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>منصة ست الكل</title>
 
-  <!-- خط Cairo -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <!-- خط Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <style>
+      html,body{height:100%;margin:0}
+      body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
+      #boot{position:fixed;inset:0;display:grid;place-items:center}
+      #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
+      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:10px 12px;text-align:center;z-index:9999;font-size:14px;line-height:1.6}
+      .stk-hide{display:none !important}
+    </style>
 
-  <!-- CSS الأصلي -->
-  <link rel="stylesheet" href="./assets/index-f95b4819.css" />
+    <!-- CSS الأصلي -->
+    <link rel="stylesheet" href="./assets/index-f95b4819.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot">جاري التحميل…</div>
 
-  <style>
-    html,body{height:100%;margin:0}
-    body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
-    #boot{position:fixed;inset:0;display:grid;place-items:center}
-    #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
+    <!-- سكربت التطبيق الأصلي -->
+    <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    /* زر بيرقر يمين (غير شفاف) + خلفية */
-    .stk-burger{position:fixed;top:10px;right:10px;z-index:2147483647;background:#ffb84d;border:none;color:#222;
-      padding:10px 12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;font-size:20px;line-height:1}
-    .stk-burger:focus{outline:2px solid #0003;outline-offset:3px}
-    .stk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:2147483646;display:none}
-    .stk-overlay.show{display:block}
-
-    /* فوتر ثابت */
-    .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:8px 12px;
-      text-align:center;z-index:2147483645;font-size:14px}
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <div id="boot">جاري التحميل…</div>
-
-  <!-- عناصر مساعدة -->
-  <div id="stk-overlay" class="stk-overlay" aria-hidden="true"></div>
-  <button id="stk-burger" class="stk-burger" aria-expanded="false" title="القائمة">☰</button>
-  <div class="stk-footer">منصة تجريبية  جميع الحقوق محفوظة 2025</div>
-
-  <!-- سكربت التطبيق الأصلي (لا تغيّره) -->
-  <script type="module" src="./assets/index-a7c04ef5.js"></script>
-
-  <!-- تخصيص “خفيف وآمن” -->
-  <script>
-    // لو صار خطأ، لا نخلي الصفحة فاضية
-    function showErr(msg){
-      const b=document.getElementById('boot');
-      if(b){ b.innerHTML = '<div class="err">'+msg+'</div>'; }
-      console.error(msg);
-    }
-
-    // انتظر حتى يُرسم شيء داخل #root ثم طبّق التخصيصات
-    (function bootWatch(){
-      let tries=0;
-      const iv=setInterval(()=>{
-        tries++;
-        if(document.getElementById('root')?.children.length){
-          clearInterval(iv);
-          initCustom();
-        } else if(tries>80){ // ~40 ثانية كحد أقصى
-          clearInterval(iv);
-          showErr('App did not mount. Check assets paths.');
+    <!-- سكربت فرض الاستبدالات وإضافة الفوتر -->
+    <script>
+      // عنوان الصفحة والميتا
+      document.title = 'منصة ست الكل';
+      function setMeta(name, content){
+        let el = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
+        if(!el){
+          el = document.createElement('meta');
+          (name.startsWith('og:')) ? el.setAttribute('property', name) : el.setAttribute('name', name);
+          document.head.appendChild(el);
         }
-      },500);
-      window.addEventListener('load', ()=>{ document.getElementById('boot')?.remove(); });
-    })();
+        el.setAttribute('content', content);
+      }
+      setMeta('og:title','منصة ست الكل');
+      setMeta('twitter:title','منصة ست الكل');
+      setMeta('description','منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
 
-    function safeReplaceAll(){
-      try{
-        const rules = [
-          [/(?:منصة)?\s*النشاط\s*الطلابي/gi,'منصة ست الكل'],
-          [/مدرسة\s*حكيم\s*بن\s*حزام.*?(?:الطربيل|الطريبيل)\s*المتوسطة/gi,'مدرسة ست الكل المتوسطة'],
-          [/مدرسة\s+.*?\s+المتوسطة/gi,'مدرسة ست الكل المتوسطة'],
-          [/محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
-          [/محمد\s*العباد/gi,'ست الكل'],
-          [/أ\.\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
-          [/الحجي/gi,''] // حذف أي ذكر للحجي
-        ];
-        const walk=(n)=>{
-          if(n.nodeType===3){
-            let t=n.nodeValue, changed=false;
-            for(const [re,rep] of rules){
-              const nt=t.replace(re,rep);
-              if(nt!==t){ t=nt; changed=true; }
-            }
-            if(changed) n.nodeValue=t;
-          }else if(n.nodeType===1 && n.tagName!=='SCRIPT' && n.tagName!=='STYLE'){
-            n.childNodes.forEach(walk);
+      // العبارات المطلوب استبدالها (مع كل الاحتمالات)
+      const hardReplacePairs = [
+        // العنوان العام
+        [/(?:منصة\s*)?النشاط\s*الطلابي/gi, 'منصة ست الكل'],
+        // اسم المدرسة
+        [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+        // التذييل القديم
+        [/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد'],
+        // أي ظهور لاسم المبرمج القديم
+        [/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد'],
+        [/Shahid\s*Weeks/gi, 'منصة ست الكل']
+      ];
+
+      // استبدال آمن لكل عقدة نصية
+      function replaceInNode(node){
+        if(node.nodeType === Node.TEXT_NODE){
+          let t = node.nodeValue, changed = false;
+          for(const [re, rep] of hardReplacePairs){
+            const nt = t.replace(re, rep);
+            if(nt !== t){ t = nt; changed = true; }
           }
-        };
-        walk(document.body);
-        // شيل الشرطة من الحقوق لو وُجدت
-        document.body.querySelectorAll('*').forEach(el=>{
-          el.childNodes && el.childNodes.forEach(n=>{
-            if(n.nodeType===3){
-              n.nodeValue = n.nodeValue.replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
-            }
-          });
-        });
-      }catch(e){ /* تجاهل */ }
-    }
-
-    function fillSettings(){
-      try{
-        const hdr=[...document.querySelectorAll('h1,h2,h3')].find(h=>/الإعدادات/.test(h.textContent||''));
-        if(!hdr) return;
-        const root = hdr.closest('main,section,div')||document;
-        [...root.querySelectorAll('input[type="text"], input[type="search"], textarea, [contenteditable="true"]')]
-          .forEach(el=>{ try{ el.value='ست الكل'; el.dispatchEvent(new Event('input',{bubbles:true})); }catch(_){} });
-        [...root.querySelectorAll('label + span, .value, .field-value, td, dd')]
-          .forEach(el=>{ if((el.innerText||'').trim()) el.innerText='ست الكل'; });
-      }catch(e){ /* لا شيء */ }
-    }
-
-    function burgerSetup(){
-      const btn=document.getElementById('stk-burger');
-      const overlay=document.getElementById('stk-overlay');
-
-      function findMenu(){
-        const texts=['الرئيسية','خطة النشاط الأسبوعي','الإذاعة المدرسية','الشواهد','الإحصائيات','الإعدادات'];
-        const all=[...document.querySelectorAll('aside,[class*="sidebar"],nav,div,section')];
-        let best=null,score=0;
-        for(const el of all){
-          const t=(el.innerText||'').trim(); let s=0;
-          texts.forEach(x=>{ if(t.includes(x)) s++; });
-          if(s>=3 && el.offsetWidth>160 && el.offsetWidth<520 && el.offsetHeight>200){
-            if(s>score){ score=s; best=el; }
+          if(changed) node.nodeValue = t;
+        } else if(node.nodeType === Node.ELEMENT_NODE){
+          // لو النص موزع على عناصر متعددة داخل عنصر واحد (مثل الفوتر)
+          const txt = node.innerText || '';
+          if(/برمجة|تصميم|عبد ?الله/.test(txt) && txt.length < 120 && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE'){
+            node.innerText = txt
+              .replace(/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025')
+              .replace(/عبد ?الله/gi, '');
           }
+          node.childNodes.forEach(replaceInNode);
         }
-        if(best){ best.style.willChange='transform,display'; best.id ||= 'stk-sidemenu'; }
-        return best;
       }
 
-      let menu=null, original='';
-      const ensure=()=>{ if(!menu || !document.body.contains(menu)){ menu=findMenu(); original=menu?menu.style.display:''; } };
+      // إخفاء أي فوتر قديم واضح
+      function hideOldFooters(){
+        const candidates = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
+        candidates.forEach(el=>{
+          const t = (el.innerText||'').trim();
+          if(/برمجة|تصميم|عبد ?الله|حقوق/.test(t)) el.classList.add('stk-hide');
+        });
+      }
 
-      function openMenu(){ ensure(); if(!menu) return; menu.style.display=original||'block'; overlay.classList.add('show'); btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ ensure(); if(!menu) return; menu.style.display='none'; overlay.classList.remove('show'); btn.setAttribute('aria-expanded','false'); }
+      // إضافة فوترنا الثابت
+      function ensureFooter(){
+        if(document.getElementById('stk-footer')) return;
+        const f = document.createElement('div');
+        f.id = 'stk-footer';
+        f.className = 'stk-footer';
+        f.innerHTML = '<strong>منصة ست الكل</strong><div>منصة تجريبية — جميع الحقوق محفوظة 2025</div>';
+        document.body.appendChild(f);
+      }
 
-      btn.addEventListener('click',e=>{ e.stopPropagation(); (btn.getAttribute('aria-expanded')==='true')?closeMenu():openMenu(); });
-      overlay.addEventListener('click',closeMenu);
-      document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
-      document.addEventListener('click',e=>{ ensure(); if(menu && !menu.contains(e.target) && e.target!==btn) closeMenu(); });
+      // تشغيل الاستبدال بشكل متكرر أول ثوانٍ + مراقبة لاحقة
+      function sweep(){
+        try { replaceInNode(document.body); hideOldFooters(); ensureFooter(); } catch(e){}
+      }
+      // مسح متكرر أول 10 ثواني (يلتقط تحميل SPA المرحلي)
+      let n=0, iv = setInterval(()=>{ sweep(); if(++n>20){ clearInterval(iv); } }, 500);
+      // مراقب تغيّرات DOM بعد ذلك
+      const mo = new MutationObserver(()=>sweep());
+      mo.observe(document.documentElement, { childList:true, subtree:true, characterData:true });
 
-      // إظهار افتراضي على الشاشات الواسعة وإخفاء على الجوال
-      function auto(){ ensure(); if(!menu) return; if(innerWidth<=1024){ menu.style.display='none'; } else { menu.style.display=original||'block'; } }
-      addEventListener('resize',auto); auto();
-    }
+      // إزالة شاشة التحميل بعد ظهور المحتوى
+      window.addEventListener('load', ()=>{ document.getElementById('boot')?.remove(); sweep(); });
+    </script>
 
-    function initCustom(){
-      try{
-        document.title='منصة ست الكل';
-        safeReplaceAll();
-        burgerSetup();
-        fillSettings();
-
-        // كرر التخصيصات مع تغييرات الـSPA
-        const applyAll=()=>{ safeReplaceAll(); fillSettings(); };
-        const mo=new MutationObserver(applyAll);
-        mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
-        setTimeout(applyAll,800);
-        setTimeout(applyAll,2000);
-      }catch(e){ showErr(e.stack||e.message); }
-    }
-  </script>
-
-  <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
-</body>
+    <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
+  </body>
 </html>
