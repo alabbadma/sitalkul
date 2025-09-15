@@ -5,142 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>منصة ست الكل</title>
 
-    <!-- خط Cairo -->
+    <!-- خط Cairo (ما يغيّر التنسيق الأصلي) -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <style>
-      html,body{height:100%;margin:0}
-      body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
-      #boot{position:fixed;inset:0;display:grid;place-items:center}
-      #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
-      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:10px 12px;text-align:center;z-index:9999;font-size:14px;line-height:1.6}
-      .stk-hide{display:none !important}
-    </style>
 
-    <!-- CSS الأصلي -->
+    <!-- تحميل وحدات ESM التي يطلبها الباندل عند الحاجة -->
+    <link rel="modulepreload" href="./assets/purify.es-2de9db7f.js">
+    <link rel="modulepreload" href="./assets/index.es-53497cc7.js">
+
+    <!-- CSS الأصلي (تأكّد أن الملف موجود في /assets) -->
     <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
-  <script>
-(function(){
-  const needed = ['weeks','programs','evidences','globalEvents','schoolRadioSchedule','schoolSettings','weeklyActivityPlans'];
-  if (needed.every(k => localStorage.getItem(k))) return;
-
-  const weeks = [{ id:'week4', title:'الأسبوع الرابع', start:'1447/03/22', end:'1447/03/26' }];
-  const schoolSettings = { schoolName:'مدرسة ست الكل المتوسطة', principal:'ست الكل', activitiesLeader:'ست الكل' };
-  const SAMPLE_PLANS = [{
-    id:'plan_week_4',
-    title:'📅 خطة الأسبوع الرابع (1447/03/22 – 1447/03/26)',
-    gradeBand:'الصفوف الأولية',
-    days:[
-      {date:'1447/03/22', field:'العلوم والتقنية', program:'الذكاء الاصطناعي', topic:'كيف أميز بين الإنسان والآلة؟', requirements:'جهاز ذكي – تجربة تفاعلية – مناقشة صفية'},
-      {date:'1447/03/23', field:'العلوم والتقنية', program:'التصاميم العلمية التقنية', topic:'ابتكار أداة بسيطة', requirements:'كرتون – خشب خفيف – ألوان – أدوات لصق'},
-      {date:'1447/03/24', field:'الرياضة والصحة', program:'النشاط البدني', topic:'لعبة التركيز وردة الفعل', requirements:'بطاقات / إشارات – نشاط جماعي'},
-      {date:'1447/03/25', field:'المواطنة والحياة', program:'الانتماء الوطني', topic:'القفز فوق الحواجز', requirements:'أطواق – جوائز بسيطة'},
-      {date:'1447/03/26', field:'الثقافة والفنون', program:'الفنون', topic:'تنظيف الفصل ونثر النباتات (أصدقاء الأرض)', requirements:'أدوات تنظيف – سلال فرز – نباتات'}
-    ]
-  }];
-
-  if(!localStorage.getItem('weeks')) localStorage.setItem('weeks', JSON.stringify(weeks));
-  if(!localStorage.getItem('programs')) localStorage.setItem('programs', JSON.stringify([]));
-  if(!localStorage.getItem('evidences')) localStorage.setItem('evidences', JSON.stringify([]));
-  if(!localStorage.getItem('globalEvents')) localStorage.setItem('globalEvents', JSON.stringify([]));
-  if(!localStorage.getItem('schoolRadioSchedule')) localStorage.setItem('schoolRadioSchedule', JSON.stringify([]));
-  if(!localStorage.getItem('schoolSettings')) localStorage.setItem('schoolSettings', JSON.stringify(schoolSettings));
-  if(!localStorage.getItem('weeklyActivityPlans')) localStorage.setItem('weeklyActivityPlans', JSON.stringify(SAMPLE_PLANS));
-})();
-</script>
-
-  <body>
+  <body style="font-family:'Cairo',system-ui,-apple-system,Segoe UI,Roboto,Arial,'Noto Sans Arabic',sans-serif;">
     <div id="root"></div>
-    <div id="boot">جاري التحميل…</div>
+    <div id="boot" style="position:fixed;inset:0;display:grid;place-items:center;">جاري التحميل…</div>
 
-    <!-- سكربت التطبيق الأصلي -->
+    <!-- تهيئة بيانات "خطة النشاط الأسبوعي" لو الـlocalStorage فاضي/فاسد -->
+    <script>
+      (function(){
+        // مرّة واحدة فقط؛ احذف القيم الفاسدة واملأ الافتراضي
+        function setSafe(key, val){
+          try{
+            const cur = localStorage.getItem(key);
+            if(cur!=null){
+              try{ JSON.parse(cur); return; }catch(e){ /* فاسدة */ }
+            }
+          }catch(e){}
+          try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+        }
+        const weeks = [{ id:'week4', title:'الأسبوع الرابع', start:'1447/03/22', end:'1447/03/26' }];
+        const schoolSettings = { schoolName:'مدرسة ست الكل المتوسطة', principal:'ست الكل', activitiesLeader:'ست الكل' };
+        const weeklyActivityPlans = [{
+          id:'plan_week_4',
+          title:'📅 خطة الأسبوع الرابع (1447/03/22 – 1447/03/26)',
+          gradeBand:'الصفوف الأولية',
+          days:[
+            {date:'1447/03/22', field:'العلوم والتقنية', program:'الذكاء الاصطناعي', topic:'كيف أميز بين الإنسان والآلة؟', requirements:'جهاز ذكي – تجربة تفاعلية – مناقشة صفية'},
+            {date:'1447/03/23', field:'العلوم والتقنية', program:'التصاميم العلمية التقنية', topic:'ابتكار أداة بسيطة', requirements:'كرتون – خشب خفيف – ألوان – أدوات لصق'},
+            {date:'1447/03/24', field:'الرياضة والصحة', program:'النشاط البدني', topic:'لعبة التركيز وردة الفعل', requirements:'بطاقات / إشارات – نشاط جماعي'},
+            {date:'1447/03/25', field:'المواطنة والحياة', program:'الانتماء الوطني', topic:'القفز فوق الحواجز', requirements:'أطواق – جوائز بسيطة'},
+            {date:'1447/03/26', field:'الثقافة والفنون', program:'الفنون', topic:'تنظيف الفصل ونثر النباتات (أصدقاء الأرض)', requirements:'أدوات تنظيف – سلال فرز – نباتات'}
+          ]
+        }];
+        setSafe('weeks', weeks);
+        setSafe('programs', []);
+        setSafe('evidences', []);
+        setSafe('globalEvents', []);
+        setSafe('schoolRadioSchedule', []);
+        setSafe('schoolSettings', schoolSettings);
+        setSafe('weeklyActivityPlans', weeklyActivityPlans);
+      })();
+    </script>
+
+    <!-- سكربت التطبيق الأصلي (تأكّد من وجوده في /assets) -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- سكربت فرض الاستبدالات وإضافة الفوتر -->
+    <!-- تعديلات خفيفة بعد التحميل: العنوان + استبدال نصوص + إزالة الشرطة في الحقوق -->
     <script>
-      // عنوان الصفحة والميتا
-      document.title = 'منصة ست الكل';
-      function setMeta(name, content){
-        let el = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
-        if(!el){
-          el = document.createElement('meta');
-          (name.startsWith('og:')) ? el.setAttribute('property', name) : el.setAttribute('name', name);
-          document.head.appendChild(el);
-        }
-        el.setAttribute('content', content);
-      }
-      setMeta('og:title','منصة ست الكل');
-      setMeta('twitter:title','منصة ست الكل');
-      setMeta('description','منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
-
-      // العبارات المطلوب استبدالها (مع كل الاحتمالات)
-      const hardReplacePairs = [
-        // العنوان العام
-        [/(?:منصة\s*)?النشاط\s*الطلابي/gi, 'منصة ست الكل'],
-        // اسم المدرسة
-        [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
-        // التذييل القديم
-        [/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025 — أ. محمد بن عبدالعزيز العباد'],
-        // أي ظهور لاسم المبرمج القديم
-        [/عبد ?الله/gi, 'محمد بن عبدالعزيز العباد'],
-        [/Shahid\s*Weeks/gi, 'منصة ست الكل']
-      ];
-
-      // استبدال آمن لكل عقدة نصية
-      function replaceInNode(node){
-        if(node.nodeType === Node.TEXT_NODE){
-          let t = node.nodeValue, changed = false;
-          for(const [re, rep] of hardReplacePairs){
-            const nt = t.replace(re, rep);
-            if(nt !== t){ t = nt; changed = true; }
+      (function(){
+        const RE = [
+          [/(?:منصة)?\s*النشاط\s*الطلابي/gi, 'منصة ست الكل'],
+          [/مدرسة\s*حكيم\s*بن\s*حزام.*?(?:الطربيل|الطريبيل)\s*المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+          [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+          [/أ?\s*\.?\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
+          [/محمد\s*العباد/gi,'ست الكل'],
+          [/الحجي/gi,'']
+        ];
+        function walk(n){
+          if(n.nodeType===3){
+            let t=n.nodeValue, c=false;
+            for(const [r,rep] of RE){ const nt=t.replace(r,rep); if(nt!==t){t=nt;c=true;} }
+            t=t.replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
+            if(c) n.nodeValue=t;
+          }else if(n.nodeType===1 && n.tagName!=='SCRIPT' && n.tagName!=='STYLE'){
+            n.childNodes.forEach(walk);
           }
-          if(changed) node.nodeValue = t;
-        } else if(node.nodeType === Node.ELEMENT_NODE){
-          // لو النص موزع على عناصر متعددة داخل عنصر واحد (مثل الفوتر)
-          const txt = node.innerText || '';
-          if(/برمجة|تصميم|عبد ?الله/.test(txt) && txt.length < 120 && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE'){
-            node.innerText = txt
-              .replace(/برمجة\s*و?\s*تصميم/gi, 'جميع الحقوق محفوظة 2025')
-              .replace(/عبد ?الله/gi, '');
-          }
-          node.childNodes.forEach(replaceInNode);
         }
-      }
-
-      // إخفاء أي فوتر قديم واضح
-      function hideOldFooters(){
-        const candidates = Array.from(document.querySelectorAll('footer,[class*="footer"],[id*="footer"]'));
-        candidates.forEach(el=>{
-          const t = (el.innerText||'').trim();
-          if(/برمجة|تصميم|عبد ?الله|حقوق/.test(t)) el.classList.add('stk-hide');
-        });
-      }
-
-      // إضافة فوترنا الثابت
-      function ensureFooter(){
-        if(document.getElementById('stk-footer')) return;
-        const f = document.createElement('div');
-        f.id = 'stk-footer';
-        f.className = 'stk-footer';
-        f.innerHTML = '<strong>منصة ست الكل</strong><div>منصة تجريبية — جميع الحقوق محفوظة 2025</div>';
-        document.body.appendChild(f);
-      }
-
-      // تشغيل الاستبدال بشكل متكرر أول ثوانٍ + مراقبة لاحقة
-      function sweep(){
-        try { replaceInNode(document.body); hideOldFooters(); ensureFooter(); } catch(e){}
-      }
-      // مسح متكرر أول 10 ثواني (يلتقط تحميل SPA المرحلي)
-      let n=0, iv = setInterval(()=>{ sweep(); if(++n>20){ clearInterval(iv); } }, 500);
-      // مراقب تغيّرات DOM بعد ذلك
-      const mo = new MutationObserver(()=>sweep());
-      mo.observe(document.documentElement, { childList:true, subtree:true, characterData:true });
-
-      // إزالة شاشة التحميل بعد ظهور المحتوى
-      window.addEventListener('load', ()=>{ document.getElementById('boot')?.remove(); sweep(); });
+        function apply(){ try{ walk(document.body); document.title='منصة ست الكل'; }catch(_){} }
+        const mo=new MutationObserver(apply);
+        mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+        window.addEventListener('load',()=>{ document.getElementById('boot')?.remove(); apply(); });
+        setTimeout(apply,800);
+      })();
     </script>
 
     <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
   </body>
 </html>
-
