@@ -8,99 +8,140 @@
     <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet" />
 
-    <!-- ستايل بسيط + بيرقر + فوتر ثابت -->
+    <!-- CSS الأصلي -->
+    <link rel="stylesheet" href="./assets/index-f95b4819.css" />
+
+    <!-- تحسينات بسيطة -->
     <style>
       html,body{height:100%;margin:0}
       body,*{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Arabic",sans-serif}
       #boot{position:fixed;inset:0;display:grid;place-items:center}
       #boot .err{direction:ltr;white-space:pre-wrap;background:#fff3f3;border:1px solid #f5c2c7;border-radius:10px;padding:12px;color:#842029;max-width:90%;max-height:60vh;overflow:auto}
-      .stk-burger{position:fixed;top:10px;right:10px;z-index:10000;background:#ffb84d;border:none;color:#222;padding:10px 12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.15);cursor:pointer}
-      .stk-burger:focus{outline:2px solid #0003;outline-offset:2px}
-      .stk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:9998;display:none}
+
+      /* زر بيرقر يمين وغير شفاف */
+      .stk-burger{position:fixed;top:10px;right:10px;z-index:2147483647;background:#ffb84d;border:none;color:#222;
+        padding:10px 12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;font-size:20px;line-height:1}
+      .stk-burger:focus{outline:2px solid #0003;outline-offset:3px}
+      .stk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:2147483646;display:none}
       .stk-overlay.show{display:block}
-      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:8px 12px;text-align:center;z-index:9997;font-size:14px}
+
+      /* فوتر ثابت */
+      .stk-footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;padding:8px 12px;
+        text-align:center;z-index:2147483645;font-size:14px}
       .stk-hide{display:none!important}
     </style>
-
-    <!-- CSS الأصلي للموقع -->
-    <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
   <body>
     <div id="root"></div>
     <div id="boot">جاري التحميل…</div>
 
-    <!-- عناصر المساعدة -->
+    <!-- عناصر مساعدة -->
     <div id="stk-overlay" class="stk-overlay" aria-hidden="true"></div>
     <button id="stk-burger" class="stk-burger" aria-controls="stk-sidemenu" aria-expanded="false" title="القائمة">☰</button>
-    <div class="stk-footer"><span>منصة تجريبية  جميع الحقوق محفوظة 2025</span></div>
+    <div class="stk-footer">منصة تجريبية  جميع الحقوق محفوظة 2025</div>
 
     <!-- سكربت التطبيق الأصلي -->
     <script type="module" src="./assets/index-a7c04ef5.js"></script>
 
-    <!-- سكربت تنظيف وتخصيص الواجهة -->
+    <!-- تخصيص + بيرقر + استبدالات + تعبئة الإعدادات -->
     <script>
-      const $ = (s,root=document)=>root.querySelector(s);
-      const $$ = (s,root=document)=>Array.from(root.querySelectorAll(s));
+      // ===== أدوات مساعدة سريعة =====
+      const $=(s,root=document)=>root.querySelector(s);
+      const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
 
-      // 1) العنوان في الشريط الأخضر + في الهيدر/السайдبار
-      function setBrand(){
-        document.title = 'منصة ست الكل';
-        const titleSelectors = [
-          'header h1','[class*="header"] h1','[class*="top"] h1',
-          '.navbar .brand','[class*="sidebar"] .brand','aside h1'
-        ];
-        $$(titleSelectors.join(',')).forEach(el=>{
-          if(!el) return;
-          el.textContent = 'منصة ست الكل';
-        });
-        // لو العنوان القديم موجود كنص بسيط
-        $$('.some-title, [class*="title"]').forEach(el=>{
-          if(/النشاط\s*الطلابي/i.test(el.textContent)) el.textContent='منصة ست الكل';
-        });
+      // ===== 1) العنوان والميتا =====
+      document.title='منصة ست الكل';
+      (function setMeta(){
+        const set=(n,c)=>{
+          let el=document.querySelector(`meta[property="${n}"],meta[name="${n}"]`);
+          if(!el){ el=document.createElement('meta'); (n.startsWith('og:')?el.setAttribute('property',n):el.setAttribute('name',n)); document.head.appendChild(el); }
+          el.setAttribute('content',c);
+        };
+        set('og:title','منصة ست الكل'); set('twitter:title','منصة ست الكل');
+        set('description','منصة ست الكل لإدارة مناشط المدرسة التعليمية واللامنهجية');
+      })();
+
+      // ===== 2) استبدال النصوص وحذف أي ذكر لاسمك =====
+      const replacePairs = [
+        [/(?:منصة)?\s*النشاط\s*الطلابي/gi,'منصة ست الكل'],
+        [/مدرسة\s*حكيم\s*بن\s*حزام.*?(?:الطربيل|الطريبيل)\s*المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+        [/مدرسة\s+.*?\s+المتوسطة/gi, 'مدرسة ست الكل المتوسطة'],
+        [/محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
+        [/محمد\s*العباد/gi,'ست الكل'],
+        [/أ\.\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل'],
+        [/Shahid\s*Weeks/gi,'منصة ست الكل'],
+        [/الحجي/gi,''] // حذف أي ذكر للحجي
+      ];
+      function replaceInNode(node){
+        if(node.nodeType===3){
+          let t=node.nodeValue; let changed=false;
+          for(const [re,rep] of replacePairs){ const nt=t.replace(re,rep); if(nt!==t){t=nt; changed=true;} }
+          if(changed) node.nodeValue=t;
+        } else if(node.nodeType===1 && node.tagName!=='SCRIPT' && node.tagName!=='STYLE'){
+          node.childNodes.forEach(replaceInNode);
+        }
       }
+      function sweepTexts(){ try{ replaceInNode(document.body); }catch(e){} }
 
-      // 2) تنظيف الفوترات/النصوص: حذف أي ذكر لـ "الحجي" + إزالة الشرطة
-      function cleanFooters(){
-        // اخفِ أي عنصر فيه "الحجي"
-        $$('footer,[class*="footer"],[id*="footer"],body *').forEach(el=>{
-          const t=(el.innerText||'').trim();
-          if(/الحجي/i.test(t)) el.remove();
-        });
-        // أي صيغة "جميع الحقوق محفوظة — 2025" تصبح بدون الشرطة
-        $$('footer,[class*="footer"],.stk-footer,body *').forEach(el=>{
-          el && el.childNodes && el.childNodes.forEach(n=>{
+      // ===== 3) فوترات قديمة — إزالة الشرطة وتكرار الاسم =====
+      function tidyFooters(){
+        $$('footer,[class*="footer"],[id*="footer"],.stk-footer,body *').forEach(el=>{
+          if(!el || !el.childNodes) return;
+          el.childNodes.forEach(n=>{
             if(n.nodeType===3){
-              n.nodeValue = n.nodeValue.replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025');
+              n.nodeValue = n.nodeValue
+                .replace(/جميع الحقوق محفوظة\s*[–—-]\s*2025/g,'جميع الحقوق محفوظة 2025')
+                .replace(/أ\.\s*محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل')
+                .replace(/محمد\s*بن\s*عبدالعزيز\s*العباد/gi,'ست الكل')
+                .replace(/محمد\s*العباد/gi,'ست الكل');
             }
           });
+          // أخفِ أي فوتر قديم يحمل التوقيع السابق
+          const t=(el.innerText||'').trim();
+          if(/برمجة|تصميم|الحقوق|العباد|الحجي/.test(t) && !el.classList.contains('stk-footer')){
+            el.classList.add('stk-hide');
+          }
         });
       }
 
-      // 3) زر البيرقر (يمين) + إغلاق عند الضغط خارج القائمة
-      let sideMenu=null;
-      function findSideMenu(){
-        const cands=['aside','[class*="sidebar"]','[class*="side"][class*="menu"]','nav[dir="rtl"]','[class*="drawer"]'];
-        for(const sel of cands){
-          const el=$(sel);
-          if(el){ return el; }
+      // ===== 4) زر البيرقر + منطق فتح/إغلاق القائمة =====
+      let sideMenu=null, originalDisplay='';
+      function detectMenu(){
+        if(sideMenu && document.body.contains(sideMenu)) return sideMenu;
+        // ابحث عن عنصر يحتوي روابط القائمة (الرئيسية + خطة النشاط الأسبوعي)
+        const texts=['الرئيسية','خطة النشاط الأسبوعي','الإذاعة المدرسية','الشواهد','الإحصائيات','الإعدادات'];
+        const all = $$('aside,nav,div,section');
+        let best=null, score=0;
+        for(const el of all){
+          const txt=(el.innerText||'').trim();
+          let s=0; texts.forEach(t=>{ if(txt.includes(t)) s++; });
+          if(s>=3 && el.offsetWidth>180 && el.offsetWidth<500 && el.offsetHeight>300){
+            if(s>score){ score=s; best=el; }
+          }
         }
-        return null;
+        if(best){
+          sideMenu=best; sideMenu.id='stk-sidemenu';
+          originalDisplay = sideMenu.style.display || '';
+          sideMenu.style.zIndex = '2147483645';
+        }
+        return sideMenu;
       }
       function openMenu(){
-        sideMenu = sideMenu || findSideMenu();
-        if(!sideMenu) return;
-        sideMenu.style.transition='transform .25s ease';
-        sideMenu.style.transform='translateX(0)';
+        const m=detectMenu(); if(!m) return;
+        m.style.display = originalDisplay || 'block';
         $('#stk-overlay').classList.add('show');
         $('#stk-burger').setAttribute('aria-expanded','true');
       }
       function closeMenu(){
-        sideMenu = sideMenu || findSideMenu();
-        if(!sideMenu) return;
-        sideMenu.style.transition='transform .25s ease';
-        sideMenu.style.transform='translateX(100%)';
+        const m=detectMenu(); if(!m) return;
+        m.style.display = 'none';
         $('#stk-overlay').classList.remove('show');
         $('#stk-burger').setAttribute('aria-expanded','false');
+      }
+      // إظهار القائمة افتراضيًا على الشاشات الواسعة، وإخفاؤها على الجوال
+      function autoMenuVisibility(){
+        const m=detectMenu(); if(!m) return;
+        if(window.innerWidth<=1024){ m.style.display='none'; } else { m.style.display=originalDisplay||'block'; }
       }
       const burger=$('#stk-burger');
       burger.addEventListener('click',e=>{
@@ -108,32 +149,41 @@
         burger.getAttribute('aria-expanded')==='true'?closeMenu():openMenu();
       });
       $('#stk-overlay').addEventListener('click',closeMenu);
+      document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
       document.addEventListener('click',e=>{
-        sideMenu = sideMenu || findSideMenu();
-        if(!sideMenu) return;
-        if(!sideMenu.contains(e.target) && e.target!==burger) closeMenu();
+        const m=detectMenu(); if(!m) return;
+        if(!m.contains(e.target) && e.target!==burger) closeMenu();
       });
+      window.addEventListener('resize',autoMenuVisibility);
 
-      // 4) منع التعليق عند “خطة النشاط الأسبوعي” في نسخة Pages (قسم غير مفعل هنا)
-      function safeWeeklyPlan(){
-        const match=/خطة النشاط(?:\s*ال(?:أ|ا)سبوعي)/;
-        $$('a,[role="link"],[class*="menu"] li,[class*="item"]').forEach(el=>{
-          const txt=(el.innerText||'').trim();
-          if(match.test(txt)){
-            el.addEventListener('click',ev=>{
-              try{ev.preventDefault();}catch(_){}
-              alert('هذه نسخة تجريبية — هذا القسم غير مفعل هنا.');
-            }, { once:true });
-          }
-        });
+      // ===== 5) تعبئة صفحة "الإعدادات" تلقائيًا بـ "ست الكل" =====
+      function fillSettingsIfVisible(){
+        const header = $$('h1,h2,h3').find(h=>/الإعدادات/.test(h.textContent||''));
+        if(!header) return;
+        const root = header.closest('main,section,div') || document;
+        // كل الحقول النصية/المناطق/العناصر القابلة للتحرير
+        $$('input[type="text"], input[type="search"], textarea, [contenteditable="true"]', root)
+          .forEach(el=>{ try{ el.value='ست الكل'; el.dispatchEvent(new Event('input',{bubbles:true})); }catch(_){} });
+        // أي سبان/ديف لعرض القيم
+        $$('label + span, .value, .field-value, td, dd', root)
+          .forEach(el=>{ if(el && (el.innerText||'').trim()) el.innerText='ست الكل'; });
       }
 
-      // 5) مراقبة تغيّر الـDOM (SPA) وتطبيق التعديلات باستمرار
-      const applyAll=()=>{ setBrand(); cleanFooters(); safeWeeklyPlan(); };
+      // ===== 6) تشغيل كل شيء + مراقبة تغييرات SPA =====
+      function applyAll(){
+        sweepTexts();
+        tidyFooters();
+        detectMenu();
+        autoMenuVisibility();
+        fillSettingsIfVisible();
+      }
       const mo=new MutationObserver(applyAll);
       mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
-
       window.addEventListener('load',()=>{ $('#boot')?.remove(); applyAll(); });
+      setTimeout(applyAll, 800);
+      setTimeout(applyAll, 2000);
     </script>
+
+    <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
   </body>
 </html>
