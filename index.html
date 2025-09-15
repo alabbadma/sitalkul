@@ -19,6 +19,36 @@
     <!-- CSS الأصلي -->
     <link rel="stylesheet" href="./assets/index-f95b4819.css" />
   </head>
+  <script>
+(function(){
+  const needed = ['weeks','programs','evidences','globalEvents','schoolRadioSchedule','schoolSettings','weeklyActivityPlans'];
+  if (needed.every(k => localStorage.getItem(k))) return;
+
+  const weeks = [{ id:'week4', title:'الأسبوع الرابع', start:'1447/03/22', end:'1447/03/26' }];
+  const schoolSettings = { schoolName:'مدرسة ست الكل المتوسطة', principal:'ست الكل', activitiesLeader:'ست الكل' };
+  const SAMPLE_PLANS = [{
+    id:'plan_week_4',
+    title:'📅 خطة الأسبوع الرابع (1447/03/22 – 1447/03/26)',
+    gradeBand:'الصفوف الأولية',
+    days:[
+      {date:'1447/03/22', field:'العلوم والتقنية', program:'الذكاء الاصطناعي', topic:'كيف أميز بين الإنسان والآلة؟', requirements:'جهاز ذكي – تجربة تفاعلية – مناقشة صفية'},
+      {date:'1447/03/23', field:'العلوم والتقنية', program:'التصاميم العلمية التقنية', topic:'ابتكار أداة بسيطة', requirements:'كرتون – خشب خفيف – ألوان – أدوات لصق'},
+      {date:'1447/03/24', field:'الرياضة والصحة', program:'النشاط البدني', topic:'لعبة التركيز وردة الفعل', requirements:'بطاقات / إشارات – نشاط جماعي'},
+      {date:'1447/03/25', field:'المواطنة والحياة', program:'الانتماء الوطني', topic:'القفز فوق الحواجز', requirements:'أطواق – جوائز بسيطة'},
+      {date:'1447/03/26', field:'الثقافة والفنون', program:'الفنون', topic:'تنظيف الفصل ونثر النباتات (أصدقاء الأرض)', requirements:'أدوات تنظيف – سلال فرز – نباتات'}
+    ]
+  }];
+
+  if(!localStorage.getItem('weeks')) localStorage.setItem('weeks', JSON.stringify(weeks));
+  if(!localStorage.getItem('programs')) localStorage.setItem('programs', JSON.stringify([]));
+  if(!localStorage.getItem('evidences')) localStorage.setItem('evidences', JSON.stringify([]));
+  if(!localStorage.getItem('globalEvents')) localStorage.setItem('globalEvents', JSON.stringify([]));
+  if(!localStorage.getItem('schoolRadioSchedule')) localStorage.setItem('schoolRadioSchedule', JSON.stringify([]));
+  if(!localStorage.getItem('schoolSettings')) localStorage.setItem('schoolSettings', JSON.stringify(schoolSettings));
+  if(!localStorage.getItem('weeklyActivityPlans')) localStorage.setItem('weeklyActivityPlans', JSON.stringify(SAMPLE_PLANS));
+})();
+</script>
+
   <body>
     <div id="root"></div>
     <div id="boot">جاري التحميل…</div>
@@ -113,3 +143,4 @@
     <noscript>هذه الصفحة تتطلب تفعيل JavaScript.</noscript>
   </body>
 </html>
+
